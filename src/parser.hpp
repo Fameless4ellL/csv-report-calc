@@ -75,10 +75,10 @@ namespace csv_median {
             const char* const* argv_) noexcept
     {
         try {
-            po::options_description desc{ "csv_median_calculator options" };
+            po::options_description desc{ "csv_report_calc options" };
             desc.add_options()
-                ("config,config", po::value<std::string>(), "path to config file")
-                ("cfg,cfg", po::value<std::string>(), "path to config file");
+                ("config", po::value<std::string>(), "path to config file")
+                ("cfg",    po::value<std::string>(), "path to config file");
 
             po::variables_map vm;
             po::store(
