@@ -54,7 +54,7 @@ int main(int argc, const char* argv[]) noexcept {
     for (const auto& rec : records) {
         calc.add(rec.price);
 
-        if (calc.is_changed()) [[likely]] {
+        if (calc.is_changed()) {
             if (const auto err = writer.write(rec.receive_ts, calc.median())) {
                 spdlog::error("error write: {}", err.message());
                 return EXIT_FAILURE;

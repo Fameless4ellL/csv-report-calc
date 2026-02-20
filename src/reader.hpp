@@ -168,7 +168,7 @@ namespace csv_median {
         while (std::getline(file, line)) {
             ++line_num;
 
-            if (line.empty()) {
+            if (line.empty()) [[unlikely]] {
                 continue;
             }
 
@@ -176,7 +176,7 @@ namespace csv_median {
             const auto ts_idx = static_cast<std::size_t>(ts_col);
             const auto price_idx = static_cast<std::size_t>(price_col);
 
-            if (parts.size() <= std::max(ts_idx, price_idx)) {
+            if (parts.size() <= std::max(ts_idx, price_idx)) [[unlikely]] {
                 spdlog::warn("{}:{} — not enough cols, pass",
                     path_.string(), line_num);
                 continue;
@@ -189,7 +189,7 @@ namespace csv_median {
             const auto [ts_end, ts_err] = std::from_chars(
                 ts_sv.data(), ts_sv.data() + ts_sv.size(), rec.receive_ts);
 
-            if (ts_err != std::errc{}) {
+            if (ts_err != std::errc{}) [[unlikely]] {
                 spdlog::warn("{}:{} — wrong format on receive_ts '{}', pass",
                     path_.string(), line_num, ts_sv);
                 continue;
@@ -200,7 +200,7 @@ namespace csv_median {
             const auto [p_end, p_err] = std::from_chars(
                 price_sv.data(), price_sv.data() + price_sv.size(), rec.price);
 
-            if (p_err != std::errc{}) {
+            if (p_err != std::errc{}) [[unlikely]] {
                 spdlog::warn("{}:{} — wrong price '{}', pass",
                     path_.string(), line_num, price_sv);
                 continue;
