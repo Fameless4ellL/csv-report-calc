@@ -91,6 +91,7 @@ enable_testing()
 
 add_executable(tests
     tests/test_median.cpp
+    tests/test_reader.cpp
 )
 
 target_include_directories(tests PRIVATE
