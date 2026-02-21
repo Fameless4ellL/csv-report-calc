@@ -11,15 +11,15 @@
 using csv_median::calculator;
 using Catch::Approx;
 
-TEST_CASE("median — базовое поведение", "[median]") {
+TEST_CASE("median - base", "[median]") {
 
-    SECTION("начальное состояние") {
+    SECTION("initial state") {
         calculator calc;
         CHECK_FALSE(calc.has_values());
         CHECK(calc.count() == 0);
     }
 
-    SECTION("одно значение") {
+    SECTION("one value") {
         calculator calc;
         calc.add(100.0);
 
@@ -29,7 +29,7 @@ TEST_CASE("median — базовое поведение", "[median]") {
         CHECK(calc.is_changed()); // первое добавление всегда меняет медиану
     }
 
-    SECTION("два значения — среднее арифметическое") {
+    SECTION("two values - average") {
         calculator calc;
         calc.add(100.0);
         calc.add(102.0);
@@ -38,7 +38,7 @@ TEST_CASE("median — базовое поведение", "[median]") {
         CHECK(calc.is_changed());
     }
 
-    SECTION("три значения — среднее") {
+    SECTION("three values") {
         calculator calc;
         calc.add(100.0);
         calc.add(102.0);
@@ -50,7 +50,7 @@ TEST_CASE("median — базовое поведение", "[median]") {
     }
 }
 
-TEST_CASE("median — case 1", "[median]") {
+TEST_CASE("median - case 1", "[median]") {
     calculator calc;
 
     // Шаг 1: price=68480.10, медиана=68480.10
@@ -74,7 +74,7 @@ TEST_CASE("median — case 1", "[median]") {
     CHECK_FALSE(calc.is_changed());
 }
 
-TEST_CASE("median — case 2", "[median]") {
+TEST_CASE("median - case 2", "[median]") {
     calculator calc;
 
     // receive_ts=1000, price=100.0 → медиана 100.0
@@ -95,25 +95,25 @@ TEST_CASE("median — case 2", "[median]") {
     CHECK(calc.median() == Approx(101.5));
 }
 
-TEST_CASE("median — is_changed корректно сбрасывается", "[median]") {
+TEST_CASE("median - is_changed correct", "[median]") {
     calculator calc;
 
     calc.add(5.0);
     CHECK(calc.is_changed());
 
-    calc.add(5.0); // медиана не изменится: [5, 5] → 5.0
+    calc.add(5.0); // [5, 5] -> 5.0, not changed
     CHECK_FALSE(calc.is_changed());
 
-    calc.add(5.0); // [5, 5, 5] → 5.0, не изменилась
+    calc.add(5.0); // [5, 5, 5] -> 5.0, not changed
     CHECK_FALSE(calc.is_changed());
 
-    calc.add(10.0); // [5, 5, 5, 10] → (5+5)/2 = 5.0, не изменилась
+    calc.add(10.0); // [5, 5, 5, 10] -> (5+5)/2 = 5.0, not changed
     CHECK_FALSE(calc.is_changed());
 
-    calc.add(10.0); // [5, 5, 5, 10, 10] → 5.0, не изменилась
+    calc.add(10.0); // [5, 5, 5, 10, 10] -> 5.0, not changed
     CHECK_FALSE(calc.is_changed());
 
-    calc.add(10.0); // [5, 5, 5, 10, 10, 10] → (5+10)/2 = 7.5, изменилась
+    calc.add(10.0); // [5, 5, 5, 10, 10, 10] -> (5+10)/2 = 7.5, changed
     CHECK(calc.is_changed());
     CHECK(calc.median() == Approx(7.5));
 }

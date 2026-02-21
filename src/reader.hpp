@@ -299,4 +299,4 @@ namespace csv_median {
         return { std::move(all_records), {} };
     }
 
-} // namespace csv_median
+}
