@@ -24,8 +24,8 @@ namespace csv_median {
      * \brief Конфигурация приложения
      */
     struct app_config {
-        fs::path              input_dir;
-        fs::path              output_dir;
+        fs::path                 input_dir;
+        fs::path                 output_dir;
         std::vector<std::string> filename_masks;
     };
 
@@ -98,14 +98,14 @@ namespace csv_median {
             const fs::path default_config =
                 fs::path{ argv_[0] }.parent_path() / "config.toml";
 
-            spdlog::info("argument -config is not used: {}",
+            spdlog::info("--config not specified, using default: {}",
                 default_config.string());
 
             return { default_config, {} };
 
         }
         catch (const std::exception& e) {
-            spdlog::error("error pasing args: {}", e.what());
+            spdlog::error("Failed to parse arguments: {}", e.what());
             return { {}, std::make_error_code(std::errc::invalid_argument) };
         }
     }
@@ -115,7 +115,7 @@ namespace csv_median {
         app_config config;
 
         if (!fs::exists(config_path_)) {
-            spdlog::error("cfg file not found: {}", config_path_.string());
+            spdlog::error("Config file not found: {}", config_path_.string());
             return { {}, std::make_error_code(std::errc::no_such_file_or_directory) };
         }
 
@@ -126,7 +126,7 @@ namespace csv_median {
             // input — обязательный параметр
             const auto input = main["input"].value<std::string>();
             if (!input) {
-                spdlog::error("requred param is empty [main].input");
+                spdlog::error("Missing required parameter [main].input");
                 return { {}, std::make_error_code(std::errc::invalid_argument) };
             }
             config.input_dir = fs::path{ *input };
@@ -150,12 +150,12 @@ namespace csv_median {
 
         }
         catch (const toml::parse_error& e) {
-            spdlog::error("error parsing TOML {}: {}", config_path_.string(),
+            spdlog::error("Failed to parse TOML {}: {}", config_path_.string(),
                 e.description());
             return { {}, std::make_error_code(std::errc::invalid_argument) };
         }
         catch (const std::exception& e) {
-            spdlog::error("unexpected error during reading cfg: {}", e.what());
+            spdlog::error("Unexpected error reading config: {}", e.what());
             return { {}, std::make_error_code(std::errc::io_error) };
         }
     }
@@ -167,7 +167,7 @@ namespace csv_median {
             return { {}, path_err };
         }
 
-        spdlog::info("reading file: {}", config_path.string());
+        spdlog::info("Loading config: {}", config_path.string());
         return load_toml(config_path);
     }
 
