@@ -1,9 +1,6 @@
 /**
  * \file test_csv_reader.cpp
  * \brief Unit-тесты для csv_reader
- *
- * Использует временные файлы через std::filesystem::temp_directory_path()
- * для изоляции тестов от файловой системы проекта.
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -238,15 +235,53 @@ TEST_CASE("reader - dir without .csv", "[csv]") {
     CHECK(records.empty());
 }
 
-TEST_CASE("reader - empty needed col", "[csv]") {
+TEST_CASE("reader - parallel reading correctness", "[csv]") {
     temp_dir tmp;
-    tmp.make_file("trade.csv",
-        "timestamp;exchange_ts;cost;quantity;side\n"
+    for (int i = 0; i < 8; ++i) {
+        tmp.make_file(
+            "trade_" + std::to_string(i) + ".csv",
+            "receive_ts;exchange_ts;price;quantity;side\n"
+            + std::to_string(i * 1000 + 100) + ";900;100.0;1.0;bid\n"
+            + std::to_string(i * 1000 + 200) + ";900;101.0;1.0;ask\n"
+        );
+    }
+
+    csv_reader reader;
+    auto [records, err] = reader.load(tmp.path, {});
+
+    REQUIRE_FALSE(err);
+    REQUIRE(records.size() == 16);
+
+    for (std::size_t i = 1; i < records.size(); ++i) {
+        CHECK(records[i].receive_ts >= records[i - 1].receive_ts);
+    }
+}
+
+TEST_CASE("reader - kway merge interleaved timestamps", "[csv]") {
+    temp_dir tmp;
+    tmp.make_file("trade_a.csv",
+        "receive_ts;exchange_ts;price;quantity;side\n"
         "1000;900;100.0;1.0;bid\n"
+        "3000;900;102.0;1.0;bid\n"
+        "5000;900;104.0;1.0;bid\n"
+    );
+    tmp.make_file("trade_b.csv",
+        "receive_ts;exchange_ts;price;quantity;side\n"
+        "2000;900;101.0;1.0;ask\n"
+        "4000;900;103.0;1.0;ask\n"
+        "6000;900;105.0;1.0;ask\n"
     );
 
     csv_reader reader;
     auto [records, err] = reader.load(tmp.path, {});
 
-    CHECK(records.empty());
+    REQUIRE_FALSE(err);
+    REQUIRE(records.size() == 6);
+
+    CHECK(records[0].receive_ts == 1000);
+    CHECK(records[1].receive_ts == 2000);
+    CHECK(records[2].receive_ts == 3000);
+    CHECK(records[3].receive_ts == 4000);
+    CHECK(records[4].receive_ts == 5000);
+    CHECK(records[5].receive_ts == 6000);
 }
